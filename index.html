@@ -73,36 +73,142 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 .userManageActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
 .statusActive{color:#08783e;font-weight:700}.statusBlocked{color:#b42318;font-weight:700}.statusHidden{color:#667085;font-weight:700}
 
-/* Premium responsive redesign */
-:root{--bg:#f5f8fc;--card:rgba(255,255,255,.96);--text:#10213d;--muted:#6b7890;--primary:#1672f3;--danger:#d92d20;--border:#e3eaf3;--shadow:0 14px 38px rgba(16,33,61,.08)}
-html{scroll-behavior:smooth}
-body{background:radial-gradient(circle at 90% -10%,rgba(22,114,243,.13),transparent 28rem),radial-gradient(circle at 5% 35%,rgba(86,73,255,.07),transparent 25rem),var(--bg);min-height:100vh}
-header{background:linear-gradient(125deg,#07162c,#102b55 58%,#07172e);padding:14px 18px;border-bottom:1px solid #ffffff14;box-shadow:0 10px 35px rgba(5,18,40,.18);backdrop-filter:blur(18px)}
-.header{max-width:1180px;min-height:68px}h1{font-size:24px;letter-spacing:-.4px}.sub{color:#b8c8df}.userBar{margin-top:8px}
-#currentUserLabel{background:#ffffff17;border:1px solid #ffffff1c;padding:7px 11px;border-radius:999px;color:#eef5ff;font-weight:700}
-header button{background:#ffffff17;color:#f4f8ff;border:1px solid #ffffff14}header button.primary{background:linear-gradient(135deg,#2586ff,#0962e9);box-shadow:0 7px 20px rgba(22,114,243,.28)}
-.container{max-width:1180px;margin:22px auto;padding:0 16px}.card,.modalBox{border:1px solid rgba(218,227,239,.9);background:var(--card);box-shadow:var(--shadow);backdrop-filter:blur(14px)}
-.card{border-radius:20px;padding:18px;margin-bottom:16px}.section-title{color:#152946}
-.search{padding:5px;background:#f7faff;border:1px solid #dfe8f5;border-radius:16px}.search input{border:0!important;background:transparent!important;color:#142742;padding:15px 14px!important;font-size:20px!important}.search input:focus{outline:none}.search button{min-width:120px;border-radius:12px;background:linear-gradient(135deg,#2384ff,#075ce0);box-shadow:0 6px 18px rgba(22,114,243,.22)}
-button{transition:transform .16s ease,box-shadow .16s ease;font-family:inherit}button:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(16,33,61,.08)}button:active{transform:scale(.98)}button.primary{background:linear-gradient(135deg,#2586ff,#0863e8)}
-.result{border:1px solid #e3eaf3;border-radius:17px;padding:15px;margin-top:11px;background:linear-gradient(135deg,#fff,#f9fbff);box-shadow:0 5px 18px rgba(16,33,61,.06)}
-.address{color:#132846;font-size:20px}.code{color:#075bd8;background:linear-gradient(135deg,#edf6ff,#e5f0ff);border:1px solid #d5e7ff;border-radius:13px;min-width:130px;padding:10px 14px}.notes{color:#58677e}
-.grid input,.grid textarea,.import textarea,.modal input,.updateText{border:1px solid #dce5f0!important;background:#fbfdff;border-radius:11px!important}.grid input:focus,.grid textarea:focus,.modal input:focus,.updateText:focus{outline:none;border-color:#68a7fa!important;box-shadow:0 0 0 4px rgba(22,114,243,.09)}
-label{font-weight:700;color:#64738a}.modal{backdrop-filter:blur(7px);background:rgba(5,17,35,.55)}.modalBox{border-radius:22px}.x{border-radius:50%;width:36px;height:36px}.authScreen{background:radial-gradient(circle at 50% 10%,rgba(22,114,243,.15),transparent 25rem),#f4f7fb}.authCard{border-radius:24px;padding:28px;box-shadow:0 24px 70px rgba(16,33,61,.13)}
-@media(max-width:650px){
- body{padding-bottom:24px;background:linear-gradient(180deg,#eef5ff 0,#f7f9fc 260px,#f5f8fc 100%)}
- header{position:sticky;top:0;padding:10px;border-radius:0 0 20px 20px}.header{min-height:auto}h1{font-size:20px}.sub{display:none}
- .userBar{margin-top:7px;gap:6px}#currentUserLabel{width:100%;text-align:center;padding:8px;font-size:13px}
- .header .actions{display:flex!important;gap:6px!important;overflow-x:auto;padding:8px 0 1px;margin-top:6px!important;scrollbar-width:none;flex-wrap:nowrap!important}.header .actions::-webkit-scrollbar{display:none}
- .header .actions button{width:auto!important;min-width:max-content!important;padding:9px 11px!important;font-size:12px!important}.userBar button{font-size:11px;padding:8px 9px}
- .container{padding:0 9px;margin:12px auto}.card{border-radius:17px;padding:11px;margin-bottom:11px;box-shadow:0 8px 24px rgba(16,33,61,.065)}
- .search{display:flex!important;gap:5px!important;padding:4px}.search input{width:100%!important;min-width:0;font-size:16px!important;padding:12px 9px!important}.search button{display:block!important;width:auto!important;min-width:76px;margin:0!important;padding:10px 12px}
- .result{padding:12px;border-radius:15px}.address{font-size:18px}.code{width:100%;font-size:30px}.result .actions{display:grid;grid-template-columns:1fr 1fr}.result .actions button{width:100%}
- .backupBar{display:grid;grid-template-columns:1fr!important}.backupBar button{min-height:44px}
- .modal{padding:7px;align-items:flex-end}.modalBox{width:100%;max-height:92vh;border-radius:23px 23px 13px 13px;padding:15px;animation:sheet .2s ease-out}
- .grid{grid-template-columns:1fr}.authCard{padding:20px;border-radius:20px}.userManageActions{display:grid!important;grid-template-columns:1fr 1fr}.userManageActions button{width:100%}
+/* ===== DeliveryCode 2026 — mobile-first premium app shell ===== */
+:root{
+ --bg:#f3f7fc;--card:#fff;--text:#10213d;--muted:#748198;--primary:#1478ff;
+ --primary2:#075bd7;--danger:#d92d20;--border:#e3eaf3;
+ --shadow:0 14px 36px rgba(18,45,82,.08);
 }
-@keyframes sheet{from{transform:translateY(24px);opacity:.5}to{transform:none;opacity:1}}
+*{-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+ background:
+ radial-gradient(circle at 85% 0,rgba(36,126,255,.13),transparent 28rem),
+ linear-gradient(180deg,#eef5ff 0,#f7f9fc 420px,#f4f7fb 100%);
+ color:var(--text);min-height:100vh;
+}
+header{
+ position:sticky;top:0;z-index:20;
+ background:linear-gradient(145deg,#07162d 0%,#0b2b58 65%,#06172f 100%);
+ padding:14px 16px 16px;border-radius:0 0 26px 26px;
+ box-shadow:0 14px 35px rgba(4,19,43,.22);border:0;
+}
+.header{max-width:1180px;min-height:0;align-items:center}
+.brandRow{display:flex;align-items:center;gap:11px}
+.brandIcon{
+ width:44px;height:44px;border-radius:15px;display:grid;place-items:center;font-size:24px;
+ background:linear-gradient(145deg,#1c8cff,#0863ea);box-shadow:0 8px 22px rgba(20,120,255,.35);
+}
+h1{font-size:24px;letter-spacing:-.5px}.sub{color:#b8c7dc;margin-top:2px}
+.userBar{margin-top:10px;gap:7px}
+#currentUserLabel{
+ padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.1);
+ border:1px solid rgba(255,255,255,.12);font-weight:700;color:#f5f8ff
+}
+header button{
+ background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);
+ color:#f6f9ff;box-shadow:none
+}
+header button.primary{background:linear-gradient(135deg,#2589ff,#0764ed);border:0}
+.container{max-width:1180px;margin:18px auto;padding:0 14px}
+.card{
+ border:1px solid rgba(219,228,239,.95);border-radius:22px;background:rgba(255,255,255,.96);
+ box-shadow:var(--shadow);padding:17px;margin-bottom:14px
+}
+.search{
+ display:flex;align-items:center;gap:8px;padding:5px 6px 5px 10px;
+ border:1px solid #dce6f2;border-radius:18px;background:#f9fbfe;
+ box-shadow:inset 0 1px 2px rgba(16,33,61,.03)
+}
+.searchIcon{font-size:27px;color:#1478ff;line-height:1;transform:rotate(-15deg);padding:0 4px}
+.search input{
+ min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;
+ font-size:19px!important;padding:14px 4px!important;color:#172a46
+}
+.search input::placeholder{color:#9aa6b8}
+.search button{
+ min-width:104px;border-radius:14px;background:linear-gradient(135deg,#278bff,#0865ed);
+ box-shadow:0 7px 18px rgba(20,120,255,.25)
+}
+.stats{padding:10px 4px 1px;color:#7b889c;font-size:13px}
+.result{
+ border:1px solid #e2e9f2;border-radius:19px;padding:15px;margin-top:12px;
+ background:linear-gradient(145deg,#fff,#fbfdff);box-shadow:0 7px 22px rgba(18,45,82,.055)
+}
+.address{font-size:21px;color:#112744;letter-spacing:-.25px}
+.code{
+ color:#0863df;background:linear-gradient(145deg,#eef7ff,#e4f0ff);
+ border:1px solid #d2e5ff;border-radius:15px;font-size:31px;padding:10px 14px;
+ box-shadow:inset 0 1px 0 #fff
+}
+button{
+ transition:transform .14s ease,box-shadow .14s ease;min-height:40px;
+ font-family:inherit
+}
+button:active{transform:scale(.975)}
+button.primary{background:linear-gradient(135deg,#278bff,#0865ed);box-shadow:0 6px 17px rgba(20,120,255,.2)}
+button.danger{background:#fff0ef;color:#b42318;border:1px solid #ffd9d5}
+.modal{background:rgba(4,15,32,.58);backdrop-filter:blur(7px)}
+.modalBox{border-radius:24px;border:1px solid #e0e8f2;box-shadow:0 25px 70px rgba(8,26,53,.22)}
+.grid input,.grid textarea,.import textarea,.modal input,.updateText{
+ border:1px solid #dbe5f0!important;background:#fbfdff;border-radius:12px!important
+}
+.grid input:focus,.grid textarea:focus,.modal input:focus,.updateText:focus{
+ outline:0;border-color:#69a9ff!important;box-shadow:0 0 0 4px rgba(20,120,255,.09)
+}
+label{font-weight:700;color:#66758c}
+.userManageCard{border-radius:16px!important;box-shadow:0 5px 18px rgba(18,45,82,.05)}
+.authScreen{background:radial-gradient(circle at 50% 0,rgba(20,120,255,.17),transparent 26rem),#f4f7fb}
+.authCard{border-radius:25px;padding:27px;box-shadow:0 25px 70px rgba(18,45,82,.13)}
+
+@media(max-width:650px){
+ body{padding-bottom:22px}
+ header{position:relative;padding:15px 12px 14px;border-radius:0 0 28px 28px}
+ .header{display:block}
+ .brandRow{justify-content:center}.brandIcon{width:40px;height:40px;border-radius:14px}
+ h1{font-size:22px}.sub{display:block;text-align:right;font-size:11px}
+ .userBar{justify-content:center;margin-top:11px}
+ #currentUserLabel{width:100%;text-align:center;font-size:14px;padding:9px}
+ #manageUsersBtn,#editAdminBtn{display:none!important}
+ .topActions{
+   display:grid!important;grid-template-columns:1.25fr 1fr 1fr!important;
+   gap:8px!important;margin-top:11px!important;overflow:visible!important;padding:0!important
+ }
+ .topActions button{
+   width:100%!important;min-width:0!important;height:52px;padding:7px 5px!important;
+   border-radius:15px;font-size:12px!important;white-space:normal;line-height:1.15
+ }
+ .topActions .quickAdd{
+   grid-column:1 / -1;height:58px;font-size:16px!important;
+   background:linear-gradient(135deg,#2b8cff,#0761e9);box-shadow:0 9px 22px rgba(20,120,255,.28)
+ }
+ .topActions .quickUsers{display:block!important}
+ .topActions .quickClear{display:none!important}
+ .container{padding:0 9px;margin:12px auto}
+ .card{padding:11px;border-radius:19px;margin-bottom:11px;box-shadow:0 8px 24px rgba(18,45,82,.065)}
+ .search{display:grid!important;grid-template-columns:auto 1fr auto;gap:3px!important;padding:4px 5px;border-radius:16px}
+ .searchIcon{font-size:24px}
+ .search input{width:100%!important;font-size:16px!important;padding:12px 3px!important}
+ .search button{display:block!important;width:auto!important;min-width:78px!important;margin:0!important;padding:10px!important}
+ .stats{padding:9px 4px 2px}
+ .result{padding:13px;border-radius:17px;margin-top:10px}
+ .address{font-size:19px}
+ .code{width:100%;font-size:32px;border-radius:14px;margin-top:2px}
+ .result .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .result .actions button{width:100%;min-height:45px}
+ .backupBar{display:grid;grid-template-columns:1fr!important}.backupBar button{width:100%;min-height:46px}
+ .modal{padding:6px;align-items:flex-end}
+ .modalBox{width:100%;max-height:92vh;border-radius:25px 25px 14px 14px;padding:15px;animation:dcSheet .2s ease-out}
+ .modalHead{position:sticky;top:-15px;z-index:3;background:rgba(255,255,255,.97);padding:7px 0}
+ .grid{grid-template-columns:1fr}
+ .userManageActions{display:grid!important;grid-template-columns:1fr 1fr}.userManageActions button{width:100%}
+ .import{display:none}
+}
+@media(min-width:651px){
+ .result:hover{transform:translateY(-2px);box-shadow:0 13px 30px rgba(18,45,82,.09)}
+ .topActions{justify-content:flex-end}
+}
+@keyframes dcSheet{from{transform:translateY(26px);opacity:.45}to{transform:none;opacity:1}}
 
 </style>
 </head>
@@ -118,11 +224,11 @@ label{font-weight:700;color:#64738a}.modal{backdrop-filter:blur(7px);background:
     <div id="loginMsg" class="hint"></div>
   </div>
 </div>
-<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה מאובטחת בענן</div><div class="userBar"><span id="currentUserLabel"></span><button id="manageUsersBtn" class="adminOnly" onclick="openUsersModal()">👥 ניהול משתמשים</button><button id="editAdminBtn" class="adminOnly" onclick="editAdminProfile()">✏️ עריכת השם שלי</button><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="openBackupActionsModal()">💾 ייצוא/ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
+<header><div class="header"><div><div class="brandRow"><div class="brandIcon">🔑</div><div><h1>קודי כניסה לשליח</h1><div class="sub">כל הכתובות והקודים שלך במקום אחד</div></div></div><div class="userBar"><span id="currentUserLabel"></span><button id="manageUsersBtn" class="adminOnly" onclick="openUsersModal()">👥 ניהול משתמשים</button><button id="editAdminBtn" class="adminOnly" onclick="editAdminProfile()">✏️ עריכת השם שלי</button><button onclick="logoutUser()">התנתק</button></div></div><div class="actions topActions"><button class="quickAdd primary" onclick="openAddModal()">➕ הוספת בניין</button><button class="quickUsers adminOnly" onclick="openUsersModal()">👥 משתמשים</button><button class="quickBackup" onclick="openBackupActionsModal()">💾 גיבוי</button><button class="quickDrive" onclick="syncDrive()">☁️ Drive</button><button class="quickUpdate" onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="quickClear" onclick="clearAll()">🗑️ ניקוי</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
 
 <div class="container">
 <div class="card">
-  <div class="search">
+  <div class="search"><span class="searchIcon">⌕</span>
     <input id="search" autocomplete="off" placeholder="חפש רחוב או כתובת, למשל: נקר 6" oninput="render()">
     <button class="primary" onclick="focusSearch()">🔎 חיפוש</button>
   </div>
