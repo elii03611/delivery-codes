@@ -86,7 +86,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
     <div id="loginMsg" class="hint"></div>
   </div>
 </div>
-<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה מאובטחת בענן</div><div class="userBar"><span id="currentUserLabel"></span><button id="manageUsersBtn" class="adminOnly" onclick="openUsersModal()">👥 ניהול משתמשים</button><button id="editAdminBtn" class="adminOnly" onclick="editAdminProfile()">✏️ עריכת השם שלי</button><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
+<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה מאובטחת בענן</div><div class="userBar"><span id="currentUserLabel"></span><button id="manageUsersBtn" class="adminOnly" onclick="openUsersModal()">👥 ניהול משתמשים</button><button id="editAdminBtn" class="adminOnly" onclick="editAdminProfile()">✏️ עריכת השם שלי</button><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="openBackupActionsModal()">💾 ייצוא/ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
 
 <div class="container">
 <div class="card">
@@ -101,11 +101,22 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <div class="card">
   <h2 class="section-title">💾 גיבוי וסנכרון</h2>
   <div class="backupBar">
-    <button onclick="exportData()">⬇️ ייצוא גיבוי</button>
-    <button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button>
+    <button onclick="openBackupActionsModal()">💾 ייצוא/ייבוא גיבוי</button>
     <button class="primary" onclick="syncDrive()">☁️ סנכרן עם Google Drive</button>
   </div>
   <div id="driveStatus" class="driveStatus">Google Drive: מוכן להתחברות ולסנכרון.</div>
+</div>
+
+<div id="backupActionsModal" class="modal" onclick="closeOnBackdrop(event,'backupActionsModal')">
+  <div class="modalBox">
+    <div class="modalHead"><h2>💾 ייצוא/ייבוא גיבוי</h2><button class="x" onclick="closeModal('backupActionsModal')">✕</button></div>
+    <div class="hint">מה תרצה לעשות?</div>
+    <div class="actions" style="margin-top:14px">
+      <button class="primary" onclick="exportData();closeModal('backupActionsModal')">⬇️ ייצוא גיבוי</button>
+      <button class="primary" onclick="closeModal('backupActionsModal');openBackupImportModal()">⬆️ ייבוא גיבוי</button>
+      <button onclick="closeModal('backupActionsModal')">ביטול</button>
+    </div>
+  </div>
 </div>
 
 <div id="backupImportModal" class="modal" onclick="closeOnBackdrop(event,'backupImportModal')">
@@ -274,6 +285,7 @@ function save(){
     .catch(e=>{console.error(e);alert('לא הצלחתי לשמור את השינוי בענן. בדוק חיבור לאינטרנט.');});
 }
 function normalize(s){return s.trim().replace(/\s+/g,' ').replace(/[״"]/g,'"')}
+function searchNormalize(s){return normalize(String(s||'')).toLocaleLowerCase('he').replace(/י/g,'')}
 function streetKey(s){return normalize(s).replace(/^רחוב\s+/,'').toLocaleLowerCase('he')}
 function sortEntries(a,b){
   const s=streetKey(a.street).localeCompare(streetKey(b.street),'he');
@@ -317,8 +329,8 @@ function parseText(text){
 }
 function render(){
   entries.sort(sortEntries);
-  const q=normalize(document.getElementById('search').value).toLocaleLowerCase('he');
-  const filtered=q?entries.filter(e=>(e.street+' '+e.number+' '+e.code+' '+e.notes).toLocaleLowerCase('he').includes(q)):entries;
+  const q=searchNormalize(document.getElementById('search').value);
+  const filtered=q?entries.filter(e=>searchNormalize(e.street+' '+e.number+' '+e.code+' '+e.notes).includes(q)):entries;
   document.getElementById('stats').textContent=`${entries.length} רשומות במאגר${q?' • '+filtered.length+' תוצאות':''}`;
   const res=document.getElementById('results');
   if(!filtered.length){res.innerHTML='<div class="empty">לא נמצאה כתובת.</div>'}
@@ -342,6 +354,8 @@ function renderTable(){
 function addEntry(){
  const street=normalize(document.getElementById('street').value), number=normalize(document.getElementById('number').value), code=normalize(document.getElementById('code').value), note=normalize(document.getElementById('note').value);
  if(!street||!code){alert('יש למלא לפחות רחוב וקוד.');return}
+ const duplicate=entries.find(e=>searchNormalize(e.street)===searchNormalize(street) && normalize(String(e.number||''))===normalize(String(number||'')));
+ if(duplicate){alert(`הכתובת כבר קיימת במאגר:\n${duplicate.street} ${duplicate.number}\n\nהכתובת לא נוספה שוב.`);return}
  entries.push({id:uid(),street,number,code,notes:note,extras:[]}); save(); ['street','number','code','note'].forEach(id=>document.getElementById(id).value=''); document.getElementById('search').value=''; render(); closeModal('addModal');
 }
 function editEntry(id){
@@ -585,7 +599,7 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('authScreen').classList.add('show');
   }
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal');closeModal('usersModal')}})
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal');closeModal('backupActionsModal');closeModal('usersModal')}})
 </script>
 <script>
 if ('serviceWorker' in navigator) {
