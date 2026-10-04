@@ -68,13 +68,13 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
   <div class="authCard">
     <h2>🔐 כניסה לשליח</h2>
     <div class="hint">החשבון יישאר מחובר במכשיר הזה גם אחרי סגירת הדפדפן, עד שתלחץ התנתק.</div>
-    <label>שם משתמש</label><input id="loginUser" autocomplete="username">
+    <label>אימייל</label><input id="loginUser" type="email" autocomplete="username" placeholder="name@example.com">
     <label>סיסמה</label><input id="loginPass" type="password" autocomplete="current-password">
     <button class="primary" style="width:100%" onclick="loginUser()">כניסה</button>
     <div id="loginMsg" class="hint"></div>
   </div>
 </div>
-<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה במכשיר</div><div class="userBar"><span id="currentUserLabel"></span><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
+<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה מאובטחת בענן</div><div class="userBar"><span id="currentUserLabel"></span><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
 
 <div class="container">
 <div class="card">
@@ -152,56 +152,77 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script>
-const INITIAL_TEXT = "כפר גנים:\n\nנקאש 1 (2580)\nנקאש 3 (0201) כ.אחורית (0303)\nנקאש 5 (0505)\nנקאש 7 (0789)\nנקאש 9 (3579)\nעמנואל זמיר 1 (9753)\nעמנואל זמיר 2 (8080)\nעמנואל זמיר 3 (2017)\nעמנואל זמיר 8 (2011)\nעמנואל זמיר 10 (1213)\nעמנואל זמיר 4 (2468)\nעמנואל זמיר 5 (0852)\nעמנואל זמיר 12 (3698)\nיגאל מוסינזון 4 (01456)\nיגאל מוסינזון 3 (3147)\nאויערבך 4 (0425)\nאויערבך 6 (0908)(ק.לכניסה בק.קרקע לדיירים(5215))\nאויערבך 7 (2468)\nנקר 44 (0123)\nנקר 33 (5555)\nנקר 31 (0369)\nנקר 36 (02468)\nפנחס חגין 1 (2040)\nפנחס חגין 3 (2233)\nפנחס חגין 9 (1810)\nפנחס חגין 11 (1478)\nפנחס חגין 14(עצמאות 69 כ.אחורית)(6969)\nנקר 21 (2580)\nנקר 25 (3013) \nנקר 19 (2468)\nנקר 17 (5555)\nנקר 13 (2771)\nנקר 11 (4587)\nנקר 7 (1397)\nנקר 5 (08521)\nנקר 3 (7*)\nנקר 2 (1369)\nשמחי 1 (7139)\nשמחי 3 (7777)\nשמחי 5 (0505)\nשמחי 7 (3068)\nמסקין 27 (2777)\nמסקין 48 (4848)\nמסקין 46 (4646)\nנריה צבי 3 (02579)\nנריה צבי 4 (2468)\nנריה צבי 5 (2007)\nנריה צבי 6 (3579)\nנריה צבי 7 (1948)\nנריה צבי 8 (20040)\nנריה צבי 9 (2014)\nנקר 32 (3254)\nנקר 39 (2408)\nנקר 15 (7*)\nנקר 30 (2580)\nנקר 27 (2727)\nנקר 9 פינת אורי קרני 2 גם מהחניה (2468)\nאורי קרני 1 (1123)\nקפלנסקי 67 (5506)\nקפלנסקי 66 (2580)\nקפלנסקי 68 (2468)\nהעצמאות 102(1928)\nדוד אבידן 10 (1950)\nעצמאות 97 (9597)\nנקאש 11 (04679)\nנקאש 13 (1346)\nישראל עידוד 10 (02580)\nישראל עידוד 8 (0842600)\nישראל עידוד 3 (0808)\nישראל עידוד 5 (8778)\nישראל עידוד 7 (7777)\nאליהו הכהן 1 (2690)\nפסח קולר (0248)\nדוד שמחי 3 (7777)\nיפה נוף 78 כ. ראשית ואחורית מאליהו.כ (0780)\nחיים זכאי 2 (07878)\nחיים זכאי 3 (1368)\nחיים זכאי 5 (1368)\nחיים זכאי 9 (1368)\nחיים זכאי 10 (4095)\nחיים זכאי 11 (7412) \nמסקין 25 (2501)\nמסקין 46 (2468)\nעמנואל קוז'ידלו 3 (2040)\nהעצמאות 108 (2323)\nהעצמאות 106 (4605)\nעצמאות 108 (2323)\nהעצמאות 91 (6928)\nנקאש 6 (3690)\nבן גוריון 41 (0852)\nבן גוריון 43 (8996)\nבן גוריון 45 (9900)\nבן גוריון 49 (4949)\nהעצמאות 108 (02323)\nעצמאות 77 (2006)\nעצמאות 83 (1978)\nעמנואל קוזודילו 1 (5550) כ.אחורית (2580)\nעמנואל קוזידלו 4 (007890)\nנקר 6 (0000)\nדוד אבידן 4 (3653)\nנקר 29 (2947)\nהרב קידר 6 (2727)\nהרב קידר 8 (2828)\nהרב קידר 1 (2580)\nעצמאות 87 (8722)\nנקר 42 (0000)\nזכאי 12 (3698)\nנקר 35 (2468)\nעצמאות 95 (9795)\nעצמאות 81 (8170) שער ירוק (1756)  \nנקר 40 (2468)\nעצמאות 8 (1436)\nעצמאות 10 (2822)\nעצמאות 14 (5577)\nעצמאות 16 (8080)\nעצמאות 20 (2010)";
-const LEGACY_KEY='delivery_entry_codes_v1';
-const USERS_KEY='delivery_users_v1';
-const SESSION_KEY='delivery_current_user_v1';
-let currentUser='';
-
-// משתמשים התחלתיים. שנה/הוסף כאן משתמשים וסיסמאות לפני העלאה ל-GitHub.
-// שים לב: באתר סטטי זו הפרדה נוחה בין מאגרים, לא אבטחה של שרת.
-const DEFAULT_USERS = {
-  admin: '1234',
-  phil: '1234'
+const firebaseConfig = {
+  apiKey: "AIzaSyABasfPpDLx8OMRlhEBmCYOAo1LGKrXbWM",
+  authDomain: "deluvery-510609.firebaseapp.com",
+  projectId: "deluvery-510609",
+  storageBucket: "deluvery-510609.firebasestorage.app",
+  messagingSenderId: "57174981139",
+  appId: "1:57174981139:web:44288408f8cc1537401de6"
 };
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-function safeUserKey(u){return encodeURIComponent(String(u).trim().toLowerCase())}
-function dataKey(){return 'delivery_entry_codes_user_'+safeUserKey(currentUser)}
-function getUsers(){try{return {...DEFAULT_USERS,...JSON.parse(localStorage.getItem(USERS_KEY)||'{}')}}catch(e){return {...DEFAULT_USERS}}}
-function hashPassword(s){ // lightweight local hash; not server-grade authentication
-  let h=2166136261; for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)} return (h>>>0).toString(16);
-}
-function normalizeUsers(){
-  const users=getUsers(), out={};
-  for(const [u,p] of Object.entries(users)) out[u]=String(p).startsWith('h:')?p:'h:'+hashPassword(p);
-  localStorage.setItem(USERS_KEY,JSON.stringify(out)); return out;
-}
-function loginUser(){
-  const u=document.getElementById('loginUser').value.trim().toLowerCase(), p=document.getElementById('loginPass').value;
-  const users=normalizeUsers();
-  if(!u || users[u]!==('h:'+hashPassword(p))){document.getElementById('loginMsg').textContent='שם המשתמש או הסיסמה אינם נכונים.';return}
-  currentUser=u; localStorage.setItem(SESSION_KEY,u); startUser();
-}
-function logoutUser(){localStorage.removeItem(SESSION_KEY);currentUser='';entries=[];googleAccessToken='';document.getElementById('authScreen').classList.remove('hidden');document.getElementById('loginPass').value='';document.getElementById('currentUserLabel').textContent=''}
-function startUser(){
-  document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('currentUserLabel').textContent='👤 '+currentUser;
-  try{entries=JSON.parse(localStorage.getItem(dataKey())||'[]')}catch(e){entries=[]}
-  // migrate the old database only to admin, once
-  if(currentUser==='admin' && !localStorage.getItem(dataKey())){
-    try{const old=JSON.parse(localStorage.getItem(LEGACY_KEY)||'[]');if(Array.isArray(old)&&old.length)entries=old}catch(e){}
-  }
-  if(!entries.length && currentUser==='admin') entries=parseText(INITIAL_TEXT).out;
-  save();entries.sort(sortEntries);render();
-}
-const GOOGLE_CLIENT_ID='57174981139-kvgbodoeva22pvboldlmhs5mm1jesujg.apps.googleusercontent.com'; // Google OAuth Web Client ID
-const DRIVE_FILE_NAME='delivery-entry-codes-backup.json';
+const GOOGLE_CLIENT_ID='57174981139-kvgbodoeva22pvboldlmhs5mm1jesujg.apps.googleusercontent.com';
 let googleAccessToken='';
 let entries=[];
+let currentUser=null;
+
+function safeUserKey(u){return encodeURIComponent(String(u||'').trim().toLowerCase())}
+
+async function loginUser(){
+  const email=document.getElementById('loginUser').value.trim();
+  const password=document.getElementById('loginPass').value;
+  const msg=document.getElementById('loginMsg');
+  msg.textContent='מתחבר...';
+  try{await auth.signInWithEmailAndPassword(email,password);msg.textContent=''}
+  catch(e){console.error(e);msg.textContent='האימייל או הסיסמה אינם נכונים.'}
+}
+async function logoutUser(){
+  googleAccessToken=''; entries=[]; await auth.signOut();
+}
+function getLegacyEntries(){
+  const keys=['delivery_entry_codes_user_admin','delivery_entry_codes_v1'];
+  for(const k of keys){
+    try{const x=JSON.parse(localStorage.getItem(k)||'[]');if(Array.isArray(x)&&x.length&&x.every(v=>v&&typeof v==='object'))return x}catch(e){}
+  }
+  return [];
+}
+async function startUser(user){
+  currentUser=user;
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('currentUserLabel').textContent='👤 '+(user.email||'משתמש');
+  try{
+    const snap=await db.collection('userData').doc(user.uid).get();
+    const cloud=snap.exists?snap.data().entries:null;
+    if(Array.isArray(cloud)&&cloud.length&&cloud.every(v=>v&&typeof v==='object')){
+      entries=cloud;
+    }else{
+      const legacy=getLegacyEntries();
+      const cache=JSON.parse(localStorage.getItem('delivery_firebase_cache_'+user.uid)||'[]');
+      entries=legacy.length?legacy:(Array.isArray(cache)?cache:[]);
+      await db.collection('userData').doc(user.uid).set({entries:entries,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    }
+    entries.sort(sortEntries); render();
+  }catch(e){
+    console.error(e);
+    alert('לא הצלחתי לטעון את המאגר מ-Firebase. בדוק חיבור לאינטרנט והרשאות Firestore.');
+  }
+}
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
-function save(){if(currentUser)localStorage.setItem(dataKey(),JSON.stringify(entries))}
+function save(){
+  if(!currentUser) return;
+  localStorage.setItem('delivery_firebase_cache_'+currentUser.uid,JSON.stringify(entries));
+  db.collection('userData').doc(currentUser.uid).set({entries:entries,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})
+    .catch(e=>{console.error(e);alert('לא הצלחתי לשמור את השינוי בענן. בדוק חיבור לאינטרנט.');});
+}
 function normalize(s){return s.trim().replace(/\s+/g,' ').replace(/[״"]/g,'"')}
 function streetKey(s){return normalize(s).replace(/^רחוב\s+/,'').toLocaleLowerCase('he')}
 function sortEntries(a,b){
@@ -324,14 +345,14 @@ async function getDriveToken(){
 }
 async function driveRequest(url,opt={}){const token=googleAccessToken||await getDriveToken();const headers=new Headers(opt.headers||{});headers.set('Authorization','Bearer '+token);return fetch(url,{...opt,headers})}
 async function listDriveBackups(){
-  const q=encodeURIComponent(`name contains 'delivery-entry-codes-backup-${safeUserKey(currentUser)}-' and trashed=false`);
+  const q=encodeURIComponent(`name contains 'delivery-entry-codes-backup-${safeUserKey(currentUser.email||currentUser.uid)}-' and trashed=false`);
   const r=await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,createdTime,modifiedTime,size)&orderBy=createdTime desc&spaces=drive`);
   if(!r.ok)throw new Error('Drive search failed');
   const d=await r.json(); return d.files||[];
 }
 function backupFileName(){
   const d=new Date(), p=n=>String(n).padStart(2,'0');
-  return `delivery-entry-codes-backup-${safeUserKey(currentUser)}-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.json`;
+  return `delivery-entry-codes-backup-${safeUserKey(currentUser.email||currentUser.uid)}-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.json`;
 }
 async function uploadDriveBackup(){
   const body=JSON.stringify(entries,null,2); const meta={name:backupFileName(),mimeType:'application/json'}; const boundary='-------deliverycodes'+Date.now();
@@ -361,7 +382,7 @@ async function restoreDriveBackup(id){
   }catch(e){console.error(e);alert('לא הצלחתי לשחזר את הגיבוי מ-Google Drive.');}
 }
 
-function clearAll(){if(confirm('למחוק את כל המאגר מהמכשיר?')){entries=[];save();render()}}
+function clearAll(){if(confirm('למחוק את כל המאגר מהענן?')){entries=[];save();render()}}
 function focusSearch(){document.getElementById('search').focus();document.getElementById('search').select()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function openAddModal(){
@@ -393,19 +414,19 @@ function updateDatabase(){
  document.getElementById('search').value='';
  alert(`המאגר עודכן בהצלחה. נטענו ${entries.length} רשומות.`);
 }
-function init(){
-  normalizeUsers();
-  const saved=localStorage.getItem(SESSION_KEY);
-  const users=getUsers();
-  if(saved && users[saved]){
-    currentUser=saved;
-    startUser();
-  }else{
+
+
+auth.onAuthStateChanged(user=>{
+  if(user){startUser(user)}
+  else{
+    currentUser=null;entries=[];
+    document.getElementById('currentUserLabel').textContent='';
+    document.getElementById('loginPass').value='';
     document.getElementById('authScreen').classList.remove('hidden');
   }
-}
+});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal')}})
-init();
+</script>
 </script>
 </body>
 </html>
