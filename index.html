@@ -59,7 +59,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 </style>
 </head>
 <body>
-<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה במכשיר</div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="document.getElementById('backupFile').click()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
+<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה במכשיר</div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
 
 <div class="container">
 <div class="card">
@@ -75,10 +75,23 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
   <h2 class="section-title">💾 גיבוי וסנכרון</h2>
   <div class="backupBar">
     <button onclick="exportData()">⬇️ ייצוא גיבוי</button>
-    <button onclick="document.getElementById('backupFile').click()">⬆️ ייבוא גיבוי</button>
+    <button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button>
     <button class="primary" onclick="syncDrive()">☁️ סנכרן עם Google Drive</button>
   </div>
   <div id="driveStatus" class="driveStatus">Google Drive: מוכן להתחברות ולסנכרון.</div>
+</div>
+
+<div id="backupImportModal" class="modal" onclick="closeOnBackdrop(event,'backupImportModal')">
+  <div class="modalBox">
+    <div class="modalHead"><h2>⬆️ ייבוא גיבוי</h2><button class="x" onclick="closeModal('backupImportModal')">✕</button></div>
+    <div class="hint">מאיפה תרצה לייבא את הגיבוי?</div>
+    <div class="actions" style="margin-top:14px">
+      <button class="primary" onclick="importBackupLocal()">📱 גיבוי מקומי</button>
+      <button class="primary" onclick="showDriveBackups()">☁️ Google Drive</button>
+      <button onclick="closeModal('backupImportModal')">ביטול</button>
+    </div>
+    <div id="driveBackupList" style="margin-top:12px"></div>
+  </div>
 </div>
 
 <div id="addModal" class="modal" onclick="closeOnBackdrop(event,'addModal')">
@@ -255,26 +268,44 @@ async function getDriveToken(){
  });
 }
 async function driveRequest(url,opt={}){const token=googleAccessToken||await getDriveToken();const headers=new Headers(opt.headers||{});headers.set('Authorization','Bearer '+token);return fetch(url,{...opt,headers})}
-async function findDriveBackup(){
- const q=encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
- const r=await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)&spaces=drive`); if(!r.ok)throw new Error('Drive search failed');
- const d=await r.json(); return d.files?.[0]||null;
+async function listDriveBackups(){
+  const q=encodeURIComponent("name contains 'delivery-entry-codes-backup-' and trashed=false");
+  const r=await driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,createdTime,modifiedTime,size)&orderBy=createdTime desc&spaces=drive`);
+  if(!r.ok)throw new Error('Drive search failed');
+  const d=await r.json(); return d.files||[];
 }
-async function uploadDriveBackup(existing){
- const body=JSON.stringify(entries,null,2); const meta={name:DRIVE_FILE_NAME,mimeType:'application/json'}; const boundary='-------deliverycodes'+Date.now();
- const multipart=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
- const url=existing?`https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart`:'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
- const r=await driveRequest(url,{method:existing?'PATCH':'POST',headers:{'Content-Type':'multipart/related; boundary='+boundary},body:multipart}); if(!r.ok)throw new Error('Drive upload failed'); return r.json();
+function backupFileName(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return `delivery-entry-codes-backup-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.json`;
+}
+async function uploadDriveBackup(){
+  const body=JSON.stringify(entries,null,2); const meta={name:backupFileName(),mimeType:'application/json'}; const boundary='-------deliverycodes'+Date.now();
+  const multipart=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+  const r=await driveRequest('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+boundary},body:multipart});
+  if(!r.ok)throw new Error('Drive upload failed'); return r.json();
 }
 async function syncDrive(){
- try{setDriveStatus('Google Drive: מתחבר...'); if(!googleAccessToken)await getDriveToken(); setDriveStatus('Google Drive: בודק גיבוי...'); const existing=await findDriveBackup();
-  if(existing){
-   const choice=confirm('נמצא גיבוי קיים ב-Google Drive.\n\nאישור = העלה את המאגר מהמכשיר ל-Drive והחלף את הגיבוי.\nביטול = הורד את הגיבוי מ-Drive למכשיר.');
-   if(choice){await uploadDriveBackup(existing);setDriveStatus('Google Drive: הסנכרון הושלם — הגיבוי בענן עודכן.');alert('הגיבוי ב-Google Drive עודכן בהצלחה.');}
-   else {const r=await driveRequest(`https://www.googleapis.com/drive/v3/files/${existing.id}?alt=media`);if(!r.ok)throw new Error('download');const data=await r.json();if(!Array.isArray(data))throw new Error('invalid');if(confirm(`להחליף את המאגר במכשיר בגיבוי מ-Google Drive (${data.length} רשומות)?`)){entries=data;save();render();setDriveStatus('Google Drive: הגיבוי הורד למכשיר בהצלחה.');}}
-  }else{await uploadDriveBackup(null);setDriveStatus('Google Drive: נוצר גיבוי חדש בענן בהצלחה.');alert('נוצר גיבוי חדש ב-Google Drive.');}
- }catch(e){console.error(e);setDriveStatus('Google Drive: הסנכרון לא הושלם.');if(e.message!=='missing client id')alert('לא הצלחתי להשלים את הסנכרון עם Google Drive. בדוק חיבור והרשאות.');}
+  if(!confirm('האם לסנכרן את האתר עם Google Drive?\n\nבכל סנכרון יישמר גיבוי חדש, והגיבויים הקודמים לא יימחקו.'))return;
+  try{setDriveStatus('Google Drive: מתחבר...'); if(!googleAccessToken)await getDriveToken(); setDriveStatus('Google Drive: יוצר גיבוי חדש...');
+    await uploadDriveBackup(); setDriveStatus('Google Drive: גיבוי חדש נשמר בהצלחה.'); alert('הסנכרון הושלם. נוצר גיבוי חדש ב-Google Drive והגיבויים הקודמים נשמרו.');
+  }catch(e){console.error(e);setDriveStatus('Google Drive: הסנכרון לא הושלם.');if(e.message!=='missing client id')alert('לא הצלחתי להשלים את הסנכרון עם Google Drive. בדוק חיבור והרשאות.');}
 }
+function openBackupImportModal(){document.getElementById('driveBackupList').innerHTML='';document.getElementById('backupImportModal').classList.add('show')}
+function importBackupLocal(){closeModal('backupImportModal');document.getElementById('backupFile').click()}
+async function showDriveBackups(){
+  const box=document.getElementById('driveBackupList');
+  try{box.innerHTML='<div class="hint">טוען גיבויים מ-Google Drive...</div>';if(!googleAccessToken)await getDriveToken();const files=await listDriveBackups();
+    if(!files.length){box.innerHTML='<div class="hint">לא נמצאו גיבויים ב-Google Drive.</div>';return}
+    box.innerHTML='<div class="hint"><b>בחר גיבוי לשחזור:</b></div>'+files.map(f=>{const d=new Date(f.createdTime||f.modifiedTime);return `<button style="width:100%;margin:5px 0;text-align:right" onclick="restoreDriveBackup('${f.id}')">☁️ ${esc(d.toLocaleString('he-IL'))}<br><span style="font-size:11px;font-weight:400">${esc(f.name)}</span></button>`}).join('');
+  }catch(e){console.error(e);box.innerHTML='<div class="hint">לא הצלחתי לטעון את הגיבויים מ-Google Drive.</div>'}
+}
+async function restoreDriveBackup(id){
+  try{const r=await driveRequest(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`);if(!r.ok)throw new Error('download');const data=await r.json();if(!Array.isArray(data))throw new Error('invalid');
+    if(!confirm(`נמצאו ${data.length} רשומות בגיבוי. להחליף את המאגר הנוכחי בגיבוי הזה?`))return;
+    entries=data;save();render();closeModal('backupImportModal');setDriveStatus('Google Drive: גיבוי קודם שוחזר בהצלחה.');alert('הגיבוי מ-Google Drive שוחזר בהצלחה.');
+  }catch(e){console.error(e);alert('לא הצלחתי לשחזר את הגיבוי מ-Google Drive.');}
+}
+
 function clearAll(){if(confirm('למחוק את כל המאגר מהמכשיר?')){entries=[];save();render()}}
 function focusSearch(){document.getElementById('search').focus();document.getElementById('search').select()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -312,7 +343,7 @@ function init(){
  if(!entries.length){entries=parseText(INITIAL_TEXT).out;save()}
  entries.sort(sortEntries);render()
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal')}})
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal')}})
 init();
 </script>
 </body>
