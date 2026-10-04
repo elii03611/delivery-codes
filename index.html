@@ -447,7 +447,8 @@ async function createCourier(){
     const cred=await secondaryApp.auth().createUserWithEmailAndPassword(email,password);
     const newUid=cred.user.uid;
     await db.collection('users').doc(newUid).set({email,role:'courier',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await db.collection('userData').doc(newUid).set({entries:[],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    // userData is created by the courier on first login. The admin's Firestore rules
+    // intentionally do not allow writing another user's private data document.
     await secondaryApp.auth().signOut();
     document.getElementById('newUserEmail').value=''; document.getElementById('newUserPass').value='';
     msg.textContent='השליח נוצר בהצלחה.'; await loadUsersList();
