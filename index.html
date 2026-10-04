@@ -236,7 +236,9 @@ async function startUser(user){
       await db.collection('userData').doc(user.uid).set({entries:entries,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
     }
     entries.sort(sortEntries); render();
+    document.getElementById('loadingScreen').classList.add('hidden');
   }catch(e){
+    document.getElementById('loadingScreen').classList.add('hidden');
     console.error(e);
     alert('לא הצלחתי לטעון את המאגר מ-Firebase. בדוק חיבור לאינטרנט והרשאות Firestore.');
   }
@@ -492,7 +494,8 @@ auth.onAuthStateChanged(user=>{
     currentUser=null;entries=[];
     document.getElementById('currentUserLabel').textContent='';
     document.getElementById('loginPass').value='';
-    document.getElementById('authScreen').classList.remove('hidden');
+    document.getElementById('loadingScreen').classList.add('hidden');
+    document.getElementById('authScreen').classList.add('show');
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal');closeModal('usersModal')}})
