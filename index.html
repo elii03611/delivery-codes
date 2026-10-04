@@ -31,7 +31,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 .empty{text-align:center;padding:30px;color:var(--muted)}
 .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 8px;font-size:12px;margin:2px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;padding:18px;align-items:center;justify-content:center}.modal.show{display:flex}.modalBox{background:white;width:min(680px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:18px;box-shadow:0 20px 60px #0005}.modalBox.wide{width:min(850px,100%)}.modalHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.modalHead h2{margin:0;font-size:20px}.x{background:transparent;font-size:20px;padding:5px 9px}.updateText{width:100%;min-height:300px;padding:12px;border:1px solid var(--border);border-radius:10px;font-family:Arial;font-size:15px;direction:rtl}.modal input{width:100%}
-@media(max-width:650px){.header{align-items:flex-start}.search{display:block}.search button{width:100%;margin-top:8px}.result{grid-template-columns:1fr}.code{width:100%;font-size:34px}.grid{grid-template-columns:1fr}.container{margin-top:10px}.card{padding:12px}}
+@media(max-width:650px){.header{align-items:flex-start}.search{display:block;width:100%}.search input{display:block;width:100%;max-width:100%}.search button{display:block;width:100%;margin-top:8px}.result{grid-template-columns:1fr}.code{width:100%;font-size:34px}.grid{grid-template-columns:1fr}.container{margin-top:10px}.card{padding:12px}}
 
 /* Mobile-first improvements */
 .backupBar{display:flex;gap:8px;flex-wrap:wrap}
@@ -63,13 +63,16 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 }
 
 
-.authScreen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:18px}
-.authScreen.hidden{display:none}.authCard{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.authScreen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;align-items:center;justify-content:center;padding:18px}.authScreen.show{display:flex}
+.loadingScreen{position:fixed;inset:0;z-index:1100;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}.loadingScreen.hidden{display:none}
+.adminOnly{display:none}
+.authCard{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
 .authCard h2{margin:0 0 8px}.authCard input{width:100%;padding:13px;border:1px solid var(--border);border-radius:10px;font-size:16px;margin:6px 0 12px}
 .userBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:#fff;font-size:13px}.userBar button{padding:8px 11px}
 </style>
 </head>
 <body>
+<div id="loadingScreen" class="loadingScreen">🔑 DeliveryCode טוען...</div>
 <div id="authScreen" class="authScreen">
   <div class="authCard">
     <h2>🔐 כניסה לשליח</h2>
@@ -80,7 +83,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
     <div id="loginMsg" class="hint"></div>
   </div>
 </div>
-<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה מאובטחת בענן</div><div class="userBar"><span id="currentUserLabel"></span><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
+<header><div class="header"><div><h1>🔑 קודי כניסה לשליח</h1><div class="sub">חיפוש מהיר • הוספה • סידור אוטומטי • שמירה מאובטחת בענן</div><div class="userBar"><span id="currentUserLabel"></span><button id="manageUsersBtn" class="adminOnly" onclick="openUsersModal()">👥 ניהול משתמשים</button><button onclick="logoutUser()">התנתק</button></div></div><div class="actions"><button onclick="exportData()">⬇️ ייצוא גיבוי</button><button onclick="openBackupImportModal()">⬆️ ייבוא גיבוי</button><button onclick="syncDrive()">☁️ סנכרון Drive</button><button onclick="openUpdateModal()">🔄 עדכון מאגר</button><button class="primary" onclick="openAddModal()">➕ הוספת בניין</button><button onclick="clearAll()">ניקוי מאגר</button><input class="fileInput" id="backupFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div></div></header>
 
 <div class="container">
 <div class="card">
@@ -112,6 +115,18 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
       <button onclick="closeModal('backupImportModal')">ביטול</button>
     </div>
     <div id="driveBackupList" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div id="usersModal" class="modal" onclick="closeOnBackdrop(event,'usersModal')">
+  <div class="modalBox">
+    <div class="modalHead"><h2>👥 ניהול משתמשים</h2><button class="x" onclick="closeModal('usersModal')">✕</button></div>
+    <div class="hint">יצירת חשבון חדש לשליח. החשבון שלך יישאר מחובר.</div>
+    <label>אימייל לשליח</label><input id="newUserEmail" type="email" placeholder="courier@example.com">
+    <label>סיסמה</label><input id="newUserPass" type="password" placeholder="לפחות 6 תווים">
+    <div class="actions" style="margin-top:12px"><button class="primary" onclick="createCourier()">➕ צור שליח</button><button onclick="closeModal('usersModal')">סגור</button></div>
+    <div id="usersMsg" class="hint"></div>
+    <div id="usersList" style="margin-top:12px"></div>
   </div>
 </div>
 
@@ -179,6 +194,8 @@ const GOOGLE_CLIENT_ID='57174981139-kvgbodoeva22pvboldlmhs5mm1jesujg.apps.google
 let googleAccessToken='';
 let entries=[];
 let currentUser=null;
+let currentRole='';
+let secondaryApp=null;
 
 function safeUserKey(u){return encodeURIComponent(String(u||'').trim().toLowerCase())}
 
@@ -202,9 +219,12 @@ function getLegacyEntries(){
 }
 async function startUser(user){
   currentUser=user;
-  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('show');
   document.getElementById('currentUserLabel').textContent='👤 '+(user.email||'משתמש');
   try{
+    const roleSnap=await db.collection('users').doc(user.uid).get();
+    currentRole=roleSnap.exists?(roleSnap.data().role||''):'';
+    document.getElementById('manageUsersBtn').style.display=currentRole==='admin'?'inline-block':'none';
     const snap=await db.collection('userData').doc(user.uid).get();
     const cloud=snap.exists?snap.data().entries:null;
     if(Array.isArray(cloud)&&cloud.length&&cloud.every(v=>v&&typeof v==='object')){
@@ -298,7 +318,7 @@ function renderTable(){
 function addEntry(){
  const street=normalize(document.getElementById('street').value), number=normalize(document.getElementById('number').value), code=normalize(document.getElementById('code').value), note=normalize(document.getElementById('note').value);
  if(!street||!code){alert('יש למלא לפחות רחוב וקוד.');return}
- entries.push({id:uid(),street,number,code,notes:note,extras:[]}); save(); ['street','number','code','note'].forEach(id=>document.getElementById(id).value=''); render(); closeModal('addModal'); document.getElementById('search').value=street+' '+number;
+ entries.push({id:uid(),street,number,code,notes:note,extras:[]}); save(); ['street','number','code','note'].forEach(id=>document.getElementById(id).value=''); document.getElementById('search').value=''; render(); closeModal('addModal');
 }
 function editEntry(id){
  const e=entries.find(x=>x.id===id); if(!e)return;
@@ -360,18 +380,27 @@ function backupFileName(){
   const d=new Date(), p=n=>String(n).padStart(2,'0');
   return `delivery-entry-codes-backup-${safeUserKey(currentUser.email||currentUser.uid)}-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.json`;
 }
+async function deleteDriveFile(id){
+  const r=await driveRequest(`https://www.googleapis.com/drive/v3/files/${id}`,{method:'DELETE'});
+  if(!r.ok && r.status!==404) throw new Error('Drive delete failed');
+}
 async function uploadDriveBackup(){
-  const body=JSON.stringify(entries,null,2); const meta={name:backupFileName(),mimeType:'application/json'}; const boundary='-------deliverycodes'+Date.now();
-  const multipart=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
-  const r=await driveRequest('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+boundary},body:multipart});
-  if(!r.ok)throw new Error('Drive upload failed'); return r.json();
+   const body=JSON.stringify(entries,null,2); const meta={name:backupFileName(),mimeType:'application/json'}; const boundary='-------deliverycodes'+Date.now();
+   const multipart=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+   const r=await driveRequest('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+boundary},body:multipart});
+   if(!r.ok)throw new Error('Drive upload failed'); return r.json();
+}
+async function trimDriveBackups(){
+  const files=await listDriveBackups();
+  for(const f of files.slice(2)) await deleteDriveFile(f.id);
 }
 async function syncDrive(){
-  if(!confirm('האם לסנכרן את האתר עם Google Drive?\n\nבכל סנכרון יישמר גיבוי חדש, והגיבויים הקודמים לא יימחקו.'))return;
-  try{setDriveStatus('Google Drive: מתחבר...'); if(!googleAccessToken)await getDriveToken(); setDriveStatus('Google Drive: יוצר גיבוי חדש...');
-    await uploadDriveBackup(); setDriveStatus('Google Drive: גיבוי חדש נשמר בהצלחה.'); alert('הסנכרון הושלם. נוצר גיבוי חדש ב-Google Drive והגיבויים הקודמים נשמרו.');
-  }catch(e){console.error(e);setDriveStatus('Google Drive: הסנכרון לא הושלם.');if(e.message!=='missing client id')alert('לא הצלחתי להשלים את הסנכרון עם Google Drive. בדוק חיבור והרשאות.');}
+   if(!confirm('האם לסנכרן את האתר עם Google Drive?\n\nיישמרו רק שני הגיבויים האחרונים: הנוכחי והקודם.'))return;
+   try{setDriveStatus('Google Drive: מתחבר...'); if(!googleAccessToken)await getDriveToken(); setDriveStatus('Google Drive: יוצר גיבוי חדש...');
+     await uploadDriveBackup(); setDriveStatus('Google Drive: מסדר את שני הגיבויים האחרונים...'); await trimDriveBackups(); setDriveStatus('Google Drive: הסנכרון הושלם. נשמרו שני הגיבויים האחרונים.'); alert('הסנכרון הושלם. נשמרו ב-Google Drive רק הגיבוי הנוכחי והגיבוי הקודם.');
+   }catch(e){console.error(e);setDriveStatus('Google Drive: הסנכרון לא הושלם.');if(e.message!=='missing client id')alert('לא הצלחתי להשלים את הסנכרון עם Google Drive. בדוק חיבור והרשאות.');}
 }
+
 function openBackupImportModal(){document.getElementById('driveBackupList').innerHTML='';document.getElementById('backupImportModal').classList.add('show')}
 function importBackupLocal(){closeModal('backupImportModal');document.getElementById('backupFile').click()}
 async function showDriveBackups(){
@@ -386,6 +415,41 @@ async function restoreDriveBackup(id){
     if(!confirm(`נמצאו ${data.length} רשומות בגיבוי. להחליף את המאגר הנוכחי בגיבוי הזה?`))return;
     entries=data;save();render();closeModal('backupImportModal');setDriveStatus('Google Drive: גיבוי קודם שוחזר בהצלחה.');alert('הגיבוי מ-Google Drive שוחזר בהצלחה.');
   }catch(e){console.error(e);alert('לא הצלחתי לשחזר את הגיבוי מ-Google Drive.');}
+}
+
+async function openUsersModal(){
+  if(currentRole!=='admin') return;
+  document.getElementById('usersMsg').textContent='';
+  document.getElementById('usersModal').classList.add('show');
+  await loadUsersList();
+}
+async function loadUsersList(){
+  const box=document.getElementById('usersList');
+  box.innerHTML='<div class="hint">טוען משתמשים...</div>';
+  try{
+    const snap=await db.collection('users').get();
+    const rows=[]; snap.forEach(d=>rows.push({uid:d.id,...d.data()}));
+    const couriers=rows.filter(x=>x.role==='courier');
+    box.innerHTML=couriers.length?'<div class="hint"><b>שליחים קיימים:</b></div>'+couriers.map(x=>`<div class="result"><div><b>${esc(x.email||x.uid)}</b><div class="meta">courier</div></div></div>`).join(''):'<div class="hint">עדיין אין שליחים.</div>';
+  }catch(e){console.error(e);box.innerHTML='<div class="hint">לא הצלחתי לטעון את רשימת המשתמשים.</div>'}
+}
+async function createCourier(){
+  if(currentRole!=='admin') return;
+  const email=document.getElementById('newUserEmail').value.trim();
+  const password=document.getElementById('newUserPass').value;
+  const msg=document.getElementById('usersMsg');
+  if(!email||password.length<6){msg.textContent='יש להזין אימייל וסיסמה של לפחות 6 תווים.';return}
+  msg.textContent='יוצר משתמש...';
+  try{
+    if(!secondaryApp){secondaryApp=firebase.initializeApp(firebaseConfig,'Secondary'); secondaryApp.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);}
+    const cred=await secondaryApp.auth().createUserWithEmailAndPassword(email,password);
+    const newUid=cred.user.uid;
+    await db.collection('users').doc(newUid).set({email,role:'courier',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('userData').doc(newUid).set({entries:[],updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    await secondaryApp.auth().signOut();
+    document.getElementById('newUserEmail').value=''; document.getElementById('newUserPass').value='';
+    msg.textContent='השליח נוצר בהצלחה.'; await loadUsersList();
+  }catch(e){console.error(e);msg.textContent=e.code==='auth/email-already-in-use'?'האימייל כבר קיים במערכת.':e.code==='auth/invalid-email'?'האימייל אינו תקין.':'לא הצלחתי ליצור את המשתמש: '+(e.message||'שגיאה');}
 }
 
 function clearAll(){if(confirm('למחוק את כל המאגר מהענן?')){entries=[];save();render()}}
@@ -431,7 +495,7 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('authScreen').classList.remove('hidden');
   }
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal')}})
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal');closeModal('usersModal')}})
 </script>
 <script>
 if ('serviceWorker' in navigator) {
