@@ -69,6 +69,9 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 .authCard{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
 .authCard h2{margin:0 0 8px}.authCard input{width:100%;padding:13px;border:1px solid var(--border);border-radius:10px;font-size:16px;margin:6px 0 12px}
 .userBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:#fff;font-size:13px}.userBar button{padding:8px 11px}
+.userManageCard{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:8px;background:#fff}
+.userManageActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.statusActive{color:#08783e;font-weight:700}.statusBlocked{color:#b42318;font-weight:700}.statusHidden{color:#667085;font-weight:700}
 </style>
 </head>
 <body>
@@ -122,10 +125,15 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
   <div class="modalBox">
     <div class="modalHead"><h2>👥 ניהול משתמשים</h2><button class="x" onclick="closeModal('usersModal')">✕</button></div>
     <div class="hint">יצירת חשבון חדש לשליח. החשבון שלך יישאר מחובר.</div>
+    <div class="grid">
+      <div><label>שם פרטי</label><input id="newUserFirstName" placeholder="למשל ישראל"></div>
+      <div><label>שם משפחה</label><input id="newUserLastName" placeholder="למשל ישראלי"></div>
+    </div>
     <label>אימייל לשליח</label><input id="newUserEmail" type="email" placeholder="courier@example.com">
     <label>סיסמה</label><input id="newUserPass" type="password" placeholder="לפחות 6 תווים">
     <div class="actions" style="margin-top:12px"><button class="primary" onclick="createCourier()">➕ צור שליח</button><button onclick="closeModal('usersModal')">סגור</button></div>
     <div id="usersMsg" class="hint"></div>
+    <div class="actions" style="margin-top:10px"><button id="showHiddenUsersBtn" onclick="toggleHiddenUsers()">הצג שליחים שהוסתרו</button></div>
     <div id="usersList" style="margin-top:12px"></div>
   </div>
 </div>
@@ -196,6 +204,7 @@ let entries=[];
 let currentUser=null;
 let currentRole='';
 let secondaryApp=null;
+let showHiddenUsers=false;
 
 function safeUserKey(u){return encodeURIComponent(String(u||'').trim().toLowerCase())}
 
@@ -220,17 +229,29 @@ function getLegacyEntries(){
 async function startUser(user){
   currentUser=user;
   document.getElementById('authScreen').classList.remove('show');
-  document.getElementById('currentUserLabel').textContent='👤 '+(user.email||'משתמש');
   try{
     const roleSnap=await db.collection('users').doc(user.uid).get();
-    currentRole=roleSnap.exists?(roleSnap.data().role||''):'';
+    const profile=roleSnap.exists?roleSnap.data():{};
+    currentRole=profile.role||'';
+    const status=profile.status||'active';
+
+    if(currentRole==='courier' && status!=='active'){
+      document.getElementById('loadingScreen').classList.add('hidden');
+      await auth.signOut();
+      document.getElementById('loginMsg').textContent='החשבון אינו פעיל. פנה למנהל.';
+      return;
+    }
+
+    const fullName=[profile.firstName,profile.lastName].filter(Boolean).join(' ').trim();
+    document.getElementById('currentUserLabel').textContent='👤 '+(fullName||user.email||'משתמש');
     document.getElementById('manageUsersBtn').style.display=currentRole==='admin'?'inline-block':'none';
+
     const snap=await db.collection('userData').doc(user.uid).get();
     const cloud=snap.exists?snap.data().entries:null;
     if(Array.isArray(cloud)&&cloud.length&&cloud.every(v=>v&&typeof v==='object')){
       entries=cloud;
     }else{
-      const legacy=getLegacyEntries();
+      const legacy=currentRole==='admin'?getLegacyEntries():[];
       const cache=JSON.parse(localStorage.getItem('delivery_firebase_cache_'+user.uid)||'[]');
       entries=legacy.length?legacy:(Array.isArray(cache)?cache:[]);
       await db.collection('userData').doc(user.uid).set({entries:entries,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
@@ -425,34 +446,72 @@ async function openUsersModal(){
   document.getElementById('usersModal').classList.add('show');
   await loadUsersList();
 }
+function toggleHiddenUsers(){
+  showHiddenUsers=!showHiddenUsers;
+  document.getElementById('showHiddenUsersBtn').textContent=showHiddenUsers?'הסתר שליחים ישנים':'הצג שליחים שהוסתרו';
+  loadUsersList();
+}
 async function loadUsersList(){
   const box=document.getElementById('usersList');
   box.innerHTML='<div class="hint">טוען משתמשים...</div>';
   try{
-    const snap=await db.collection('users').get();
-    const rows=[]; snap.forEach(d=>rows.push({uid:d.id,...d.data()}));
-    const couriers=rows.filter(x=>x.role==='courier');
-    box.innerHTML=couriers.length?'<div class="hint"><b>שליחים קיימים:</b></div>'+couriers.map(x=>`<div class="result"><div><b>${esc(x.email||x.uid)}</b><div class="meta">courier</div></div></div>`).join(''):'<div class="hint">עדיין אין שליחים.</div>';
+    const snap=await db.collection('users').get(), rows=[];
+    snap.forEach(d=>rows.push({uid:d.id,...d.data()}));
+    let couriers=rows.filter(x=>x.role==='courier');
+    if(!showHiddenUsers)couriers=couriers.filter(x=>(x.status||'active')!=='hidden');
+    if(!couriers.length){box.innerHTML='<div class="hint">אין שליחים להצגה.</div>';return}
+    box.innerHTML=couriers.map(x=>{
+      const name=[x.firstName,x.lastName].filter(Boolean).join(' ').trim()||'ללא שם';
+      const status=x.status||'active';
+      const st=status==='blocked'?'חסום':status==='hidden'?'מוסתר':'פעיל';
+      const cls=status==='blocked'?'statusBlocked':status==='hidden'?'statusHidden':'statusActive';
+      const toggle=status==='blocked'
+        ?`<button onclick="setCourierStatus('${x.uid}','active')">✅ הפעל מחדש</button>`
+        :status==='active'?`<button onclick="setCourierStatus('${x.uid}','blocked')">🚫 חסום</button>`
+        :`<button onclick="setCourierStatus('${x.uid}','active')">↩️ החזר לרשימה</button>`;
+      const hide=status==='hidden'?'':`<button class="danger" onclick="hideCourier('${x.uid}')">🗑️ הסתר מהרשימה</button>`;
+      return `<div class="userManageCard"><b>${esc(name)}</b><div class="meta">${esc(x.email||'')}</div><div class="${cls}">${st}</div><div class="userManageActions"><button onclick="editCourier('${x.uid}')">✏️ ערוך שם</button>${toggle}${hide}</div></div>`;
+    }).join('');
   }catch(e){console.error(e);box.innerHTML='<div class="hint">לא הצלחתי לטעון את רשימת המשתמשים.</div>'}
 }
 async function createCourier(){
-  if(currentRole!=='admin') return;
+  if(currentRole!=='admin')return;
+  const firstName=document.getElementById('newUserFirstName').value.trim();
+  const lastName=document.getElementById('newUserLastName').value.trim();
   const email=document.getElementById('newUserEmail').value.trim();
   const password=document.getElementById('newUserPass').value;
   const msg=document.getElementById('usersMsg');
-  if(!email||password.length<6){msg.textContent='יש להזין אימייל וסיסמה של לפחות 6 תווים.';return}
+  if(!firstName||!lastName||!email||password.length<6){msg.textContent='יש להזין שם פרטי, שם משפחה, אימייל וסיסמה של לפחות 6 תווים.';return}
   msg.textContent='יוצר משתמש...';
   try{
-    if(!secondaryApp){secondaryApp=firebase.initializeApp(firebaseConfig,'Secondary'); secondaryApp.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);}
-    const cred=await secondaryApp.auth().createUserWithEmailAndPassword(email,password);
-    const newUid=cred.user.uid;
-    await db.collection('users').doc(newUid).set({email,role:'courier',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    // userData is created by the courier on first login. The admin's Firestore rules
-    // intentionally do not allow writing another user's private data document.
+    if(!secondaryApp){secondaryApp=firebase.initializeApp(firebaseConfig,'Secondary');secondaryApp.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)}
+    const cred=await secondaryApp.auth().createUserWithEmailAndPassword(email,password), newUid=cred.user.uid;
+    await db.collection('users').doc(newUid).set({firstName,lastName,email,role:'courier',status:'active',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     await secondaryApp.auth().signOut();
-    document.getElementById('newUserEmail').value=''; document.getElementById('newUserPass').value='';
-    msg.textContent='השליח נוצר בהצלחה.'; await loadUsersList();
-  }catch(e){console.error(e);msg.textContent=e.code==='auth/email-already-in-use'?'האימייל כבר קיים במערכת.':e.code==='auth/invalid-email'?'האימייל אינו תקין.':'לא הצלחתי ליצור את המשתמש: '+(e.message||'שגיאה');}
+    ['newUserFirstName','newUserLastName','newUserEmail','newUserPass'].forEach(id=>document.getElementById(id).value='');
+    msg.textContent='השליח נוצר בהצלחה.';await loadUsersList();
+  }catch(e){console.error(e);try{if(secondaryApp?.auth().currentUser)await secondaryApp.auth().signOut()}catch(_){}
+    msg.textContent=e.code==='auth/email-already-in-use'?'האימייל כבר קיים במערכת.':e.code==='auth/invalid-email'?'האימייל אינו תקין.':'לא הצלחתי ליצור את המשתמש: '+(e.message||'שגיאה');
+  }
+}
+async function editCourier(userId){
+  try{
+    const ref=db.collection('users').doc(userId),snap=await ref.get();if(!snap.exists)return;
+    const x=snap.data(),firstName=prompt('שם פרטי:',x.firstName||'');if(firstName===null)return;
+    const lastName=prompt('שם משפחה:',x.lastName||'');if(lastName===null)return;
+    if(!firstName.trim()||!lastName.trim()){alert('שם פרטי ושם משפחה לא יכולים להיות ריקים.');return}
+    await ref.update({firstName:firstName.trim(),lastName:lastName.trim(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});await loadUsersList();
+  }catch(e){console.error(e);alert('לא הצלחתי לערוך את השליח.')}
+}
+async function setCourierStatus(userId,status){
+  if(!confirm(status==='active'?'להפעיל מחדש את השליח?':'לחסום את השליח?'))return;
+  try{await db.collection('users').doc(userId).update({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});await loadUsersList()}
+  catch(e){console.error(e);alert('לא הצלחתי לעדכן את מצב השליח.')}
+}
+async function hideCourier(userId){
+  if(!confirm('להסתיר את השליח מהרשימה?\n\nהוא גם ייחסם ולא יוכל להשתמש באפליקציה. ניתן להחזיר אותו בעתיד.'))return;
+  try{await db.collection('users').doc(userId).update({status:'hidden',updatedAt:firebase.firestore.FieldValue.serverTimestamp()});await loadUsersList()}
+  catch(e){console.error(e);alert('לא הצלחתי להסתיר את השליח.')}
 }
 
 function clearAll(){if(confirm('למחוק את כל המאגר מהענן?')){entries=[];save();render()}}
