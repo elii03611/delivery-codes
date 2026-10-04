@@ -439,6 +439,9 @@ async function syncDrive(){
    }catch(e){console.error(e);setDriveStatus('Google Drive: הסנכרון לא הושלם.');if(e.message!=='missing client id')alert('לא הצלחתי להשלים את הסנכרון עם Google Drive. בדוק חיבור והרשאות.');}
 }
 
+function openBackupActionsModal(){
+  document.getElementById('backupActionsModal').classList.add('show');
+}
 function openBackupImportModal(){document.getElementById('driveBackupList').innerHTML='';document.getElementById('backupImportModal').classList.add('show')}
 function importBackupLocal(){closeModal('backupImportModal');document.getElementById('backupFile').click()}
 async function showDriveBackups(){
