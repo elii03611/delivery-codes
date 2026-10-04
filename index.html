@@ -3,7 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>קודי כניסה לשליח</title>
+<title>DeliveryCode</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DeliveryCode">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#17202a;--muted:#667085;--primary:#1769e0;--danger:#c62828;--border:#dfe4ea;--shadow:0 6px 20px rgba(0,0,0,.07)}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
@@ -427,6 +433,10 @@ auth.onAuthStateChanged(user=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal')}})
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
+}
 </script>
 </body>
 </html>
