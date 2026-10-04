@@ -394,9 +394,15 @@ function updateDatabase(){
  alert(`המאגר עודכן בהצלחה. נטענו ${entries.length} רשומות.`);
 }
 function init(){
- try{entries=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){entries=[]}
- if(!entries.length){entries=parseText(INITIAL_TEXT).out;save()}
- entries.sort(sortEntries);render()
+  normalizeUsers();
+  const saved=localStorage.getItem(SESSION_KEY);
+  const users=getUsers();
+  if(saved && users[saved]){
+    currentUser=saved;
+    startUser();
+  }else{
+    document.getElementById('authScreen').classList.remove('hidden');
+  }
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('addModal');closeModal('updateModal');closeModal('backupImportModal')}})
 init();
