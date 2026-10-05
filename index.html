@@ -292,6 +292,108 @@ header:after{content:"";position:absolute;width:280px;height:280px;border-radius
  .container>.card:last-child{display:none!important}
 }
 
+
+/* ===== DELIVERYCODE BLUE APP — mobile rebuild ===== */
+.mobileDock{display:none}
+@media(max-width:650px){
+ body{padding-bottom:105px!important;background:#f4f7fb!important}
+ header{
+   position:relative!important;border-radius:0 0 26px 26px!important;
+   background:linear-gradient(150deg,#06172f 0%,#0a2d5c 72%,#071d3c 100%)!important;
+   box-shadow:0 12px 30px rgba(4,22,49,.18)!important
+ }
+ .header{padding:14px 14px 16px!important}
+ .heroTop{display:flex!important;align-items:center!important;justify-content:space-between!important}
+ .brandRow{justify-content:flex-start!important;gap:10px!important}
+ .brandIcon{width:42px!important;height:42px!important;flex:0 0 42px!important;font-size:22px!important;border-radius:14px!important}
+ .brandRow h1{font-size:21px!important;white-space:nowrap!important}
+ .brandRow .sub{font-size:10px!important;text-align:right!important;margin-top:2px!important}
+ .userBar{display:flex!important;margin:0!important;width:auto!important}
+ #currentUserLabel{
+   width:auto!important;max-width:150px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+   padding:8px 10px!important;font-size:11px!important;border-radius:13px!important
+ }
+ .logoutBtn,#manageUsersBtn,#editAdminBtn{display:none!important}
+
+ /* Management no longer consumes the home screen */
+ .quickGrid{display:none!important}
+ .fabAdd{display:none!important}
+
+ .container{margin:12px auto!important;padding:0 10px!important}
+ .container>.card:first-child{
+   border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin-bottom:8px!important
+ }
+ .container>.card:first-child:before{content:""!important;display:none!important}
+ .search{
+   height:58px!important;padding:5px!important;border-radius:19px!important;background:#fff!important;
+   border:1px solid #dfe7f1!important;box-shadow:0 8px 25px rgba(16,48,88,.08)!important
+ }
+ .search input{font-size:16px!important;padding:10px 12px!important}
+ .search button{width:48px!important;min-width:48px!important;height:48px!important;border-radius:15px!important}
+ .stats{font-size:12px!important;padding:10px 7px 5px!important;color:#7a8799!important}
+
+ /* Address cards: completely new app card hierarchy */
+ .result{
+   display:grid!important;grid-template-columns:54px 1fr!important;gap:0 12px!important;
+   padding:14px!important;margin-top:10px!important;border-radius:21px!important;
+   background:#fff!important;border:1px solid #e5ebf3!important;
+   box-shadow:0 8px 24px rgba(18,48,82,.055)!important;overflow:visible!important
+ }
+ .result:before{
+   content:"🏢"!important;position:static!important;width:54px!important;height:54px!important;
+   display:grid!important;place-items:center!important;border-radius:16px!important;
+   background:linear-gradient(145deg,#eaf4ff,#dcecff)!important;font-size:25px!important
+ }
+ .result>div:first-of-type{grid-column:2!important;grid-row:1!important;min-width:0!important}
+ .result>div:last-child{grid-column:1/-1!important;grid-row:2!important;margin-top:11px!important}
+ .result .address{font-size:20px!important;line-height:1.2!important;margin:1px 0 5px!important}
+ .result .address:before{content:""!important;margin:0!important}
+ .result .notes,.result .meta{font-size:12px!important;line-height:1.45!important;color:#77849a!important}
+ .code{
+   min-height:62px!important;width:100%!important;font-size:31px!important;letter-spacing:3px!important;
+   border-radius:15px!important;background:linear-gradient(145deg,#eef7ff,#e2efff)!important;
+   border:1px solid #cfe2fb!important;color:#075fda!important
+ }
+ .result .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-top:8px!important}
+ .result .actions button{min-height:43px!important;border-radius:13px!important;font-size:14px!important}
+ .result .actions button:not(.danger){background:#edf2f8!important;color:#20324d!important}
+ .result .actions .danger{background:#fff0ef!important;color:#b42318!important;border-color:#ffd8d4!important}
+
+ /* Fixed native-like bottom navigation */
+ .mobileDock{
+   position:fixed;z-index:80;display:grid!important;grid-template-columns:1fr 1fr 72px 1fr 1fr;
+   align-items:end;left:10px;right:10px;bottom:10px;height:72px;padding:7px 9px;
+   border-radius:24px;background:rgba(255,255,255,.94);border:1px solid rgba(219,227,238,.95);
+   box-shadow:0 14px 38px rgba(15,40,72,.18);backdrop-filter:blur(18px)
+ }
+ .dockItem{
+   height:57px!important;min-width:0!important;padding:4px!important;border:0!important;background:transparent!important;
+   color:#65758e!important;box-shadow:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1px
+ }
+ .dockItem span{font-size:22px;line-height:1}.dockItem small{font-size:10px;font-weight:700}
+ .dockItem.active{color:#0877ff!important}
+ .dockAdd{
+   align-self:center;width:62px!important;height:62px!important;min-height:62px!important;border-radius:21px!important;
+   border:0!important;background:linear-gradient(145deg,#2b91ff,#0864eb)!important;color:white!important;
+   font-size:34px!important;box-shadow:0 10px 25px rgba(8,119,255,.38)!important;transform:translateY(-16px)
+ }
+ .dockAdd:active{transform:translateY(-16px) scale(.95)!important}
+
+ .mobileManageBox{padding:15px!important}
+ .manageMenu{display:grid;gap:8px;margin-top:8px}
+ .manageMenu button{
+   width:100%!important;min-height:65px!important;display:grid!important;grid-template-columns:46px 1fr auto!important;
+   align-items:center!important;gap:10px!important;text-align:right!important;padding:9px 10px!important;
+   border-radius:16px!important;background:#f8faff!important;border:1px solid #e5ebf3!important;color:#162943!important
+ }
+ .manageMenu .manageIcon{width:42px;height:42px;border-radius:13px;background:#eaf3ff;display:grid;place-items:center;font-size:20px;color:#0877ff}
+ .manageMenu b{display:block;font-size:14px}.manageMenu small{display:block;font-size:10px;color:#7c899b;margin-top:2px}.manageMenu .chev{font-size:25px;color:#9aa7b8}
+ .manageMenu .dangerRow{color:#b42318!important}.manageMenu .dangerRow .manageIcon{background:#fff0ef;color:#b42318}
+
+ /* Keep secondary desktop/maintenance sections out of the courier home view */
+ .container>.card:nth-last-child(-n+2){display:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -836,6 +938,8 @@ function updateDatabase(){
 }
 
 
+function openMobileManage(){document.getElementById('mobileManageModal').classList.add('show')}
+
 auth.onAuthStateChanged(user=>{
   if(user){startUser(user)}
   else{
@@ -853,5 +957,28 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
 }
 </script>
+
+<!-- Mobile app navigation -->
+<nav class="mobileDock" aria-label="ניווט">
+  <button class="dockItem active" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span>⌕</span><small>חיפוש</small></button>
+  <button class="dockItem" onclick="openMobileManage()"><span>⚙</span><small>ניהול</small></button>
+  <button class="dockAdd" onclick="openAddModal()" aria-label="הוספת בניין">＋</button>
+  <button class="dockItem" onclick="openBackupActionsModal()"><span>☁</span><small>גיבוי</small></button>
+  <button class="dockItem adminOnly" onclick="openUsersModal()"><span>♟</span><small>שליחים</small></button>
+</nav>
+
+<div id="mobileManageModal" class="modal" onclick="closeOnBackdrop(event,'mobileManageModal')">
+  <div class="modalBox mobileManageBox">
+    <div class="modalHead"><h2>ניהול</h2><button class="x" onclick="closeModal('mobileManageModal')">✕</button></div>
+    <div class="manageMenu">
+      <button class="adminOnly" onclick="closeModal('mobileManageModal');openUsersModal()"><span class="manageIcon">👥</span><span><b>ניהול משתמשים</b><small>שליחים והרשאות</small></span><span class="chev">‹</span></button>
+      <button class="adminOnly" onclick="closeModal('mobileManageModal');editAdminProfile()"><span class="manageIcon">✎</span><span><b>עריכת השם שלי</b><small>שם פרטי ומשפחה</small></span><span class="chev">‹</span></button>
+      <button onclick="closeModal('mobileManageModal');openBackupActionsModal()"><span class="manageIcon">↕</span><span><b>ייצוא / ייבוא</b><small>גיבוי מקומי</small></span><span class="chev">‹</span></button>
+      <button onclick="closeModal('mobileManageModal');syncDrive()"><span class="manageIcon">☁</span><span><b>Google Drive</b><small>סנכרון לענן</small></span><span class="chev">‹</span></button>
+      <button onclick="closeModal('mobileManageModal');openUpdateModal()"><span class="manageIcon">↻</span><span><b>עדכון מאגר</b><small>ייבוא רשימת כתובות</small></span><span class="chev">‹</span></button>
+      <button class="dangerRow" onclick="closeModal('mobileManageModal');logoutUser()"><span class="manageIcon">↪</span><span><b>התנתקות</b><small>יציאה מהחשבון</small></span><span class="chev">‹</span></button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
