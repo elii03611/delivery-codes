@@ -394,6 +394,54 @@ header:after{content:"";position:absolute;width:280px;height:280px;border-radius
  .container>.card:nth-last-child(-n+2){display:none!important}
 }
 
+
+/* ===== Home / My Addresses separation ===== */
+.mobileHome{display:none}
+.backHomeBtn{display:none}
+@media(max-width:650px){
+ .mobileHome{display:block;padding:16px 12px 110px}
+ .mobileHome.mobileHidden{display:none!important}
+ .addressesView{display:none!important}
+ .addressesView.mobileOpen{display:block!important}
+ .backHomeBtn{
+   display:flex!important;align-items:center;justify-content:center;width:100%;height:43px;
+   margin:0 0 10px;border-radius:14px;background:#eaf3ff!important;color:#075fd9!important;
+   border:1px solid #d3e5fb!important;font-weight:800
+ }
+ .homeWelcome{
+   display:flex;gap:13px;align-items:center;padding:18px;border-radius:23px;
+   background:#fff;border:1px solid #e2eaf4;box-shadow:0 10px 28px rgba(18,48,82,.07)
+ }
+ .homeWelcomeIcon{
+   width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:19px;
+   background:linear-gradient(145deg,#eaf4ff,#dcecff);font-size:29px
+ }
+ .homeWelcome h2{font-size:19px;margin:0 0 4px;color:#112641}
+ .homeWelcome p{font-size:12px;line-height:1.5;color:#7b889c;margin:0}
+ .homeActions{display:grid;gap:10px;margin-top:12px}
+ .homeActions button{
+   min-height:82px;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;
+   column-gap:12px;align-items:center;text-align:right;padding:12px 14px;border-radius:20px;
+   background:#fff!important;color:#152a47!important;border:1px solid #e2eaf4!important;
+   box-shadow:0 8px 23px rgba(18,48,82,.055)!important
+ }
+ .homeActions button>span{
+   grid-row:1/3;width:50px;height:50px;border-radius:16px;display:grid;place-items:center;
+   background:#eaf3ff;color:#0877ff;font-size:25px
+ }
+ .homeActions button>b{align-self:end;font-size:16px}
+ .homeActions button>small{align-self:start;color:#7c899b;font-size:11px;margin-top:2px}
+ .homeActions .homePrimary{
+   background:linear-gradient(140deg,#1685ff,#075edc)!important;color:white!important;
+   border:0!important;box-shadow:0 12px 28px rgba(8,119,255,.25)!important
+ }
+ .homeActions .homePrimary>span{background:#ffffff1c;color:white}
+ .homeActions .homePrimary>small{color:#dbeaff}
+}
+@media(min-width:651px){
+ .addressesView{display:block!important}
+}
+
 </style>
 </head>
 <body>
@@ -434,7 +482,19 @@ header:after{content:"";position:absolute;width:280px;height:280px;border-radius
 </header>
 
 <button class="fabAdd" onclick="openAddModal()" aria-label="הוספת בניין">＋</button>
-<div class="container">
+<main id="mobileHome" class="mobileHome">
+  <section class="homeWelcome">
+    <div class="homeWelcomeIcon">🔑</div>
+    <div><h2>הכול מוכן למשלוח הבא</h2><p>חפש כתובת, הוסף בניין חדש או פתח את מאגר הכתובות שלך.</p></div>
+  </section>
+  <section class="homeActions">
+    <button class="homePrimary" onclick="openAddressesView()"><span>🏢</span><b>הכתובות שלי</b><small>צפייה וחיפוש במאגר</small></button>
+    <button onclick="openAddModal()"><span>＋</span><b>הוספת בניין</b><small>כתובת וקוד חדשים</small></button>
+    <button onclick="openMobileManage()"><span>⚙</span><b>ניהול</b><small>גיבוי, Drive ומשתמשים</small></button>
+  </section>
+</main>
+<div id="addressesView" class="container addressesView">
+<button class="backHomeBtn" onclick="showMobileHome()">→ חזרה למסך הבית</button>
 <div class="card">
   <div class="search"><span class="searchIcon">⌕</span>
     <input id="search" autocomplete="off" placeholder="חפש רחוב או כתובת, למשל: נקר 6" oninput="render()">
@@ -938,6 +998,20 @@ function updateDatabase(){
 }
 
 
+function openAddressesView(){
+  const home=document.getElementById('mobileHome');
+  const view=document.getElementById('addressesView');
+  if(home)home.classList.add('mobileHidden');
+  if(view)view.classList.add('mobileOpen');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showMobileHome(){
+  const home=document.getElementById('mobileHome');
+  const view=document.getElementById('addressesView');
+  if(home)home.classList.remove('mobileHidden');
+  if(view)view.classList.remove('mobileOpen');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 function openMobileManage(){document.getElementById('mobileManageModal').classList.add('show')}
 
 auth.onAuthStateChanged(user=>{
@@ -960,7 +1034,7 @@ if ('serviceWorker' in navigator) {
 
 <!-- Mobile app navigation -->
 <nav class="mobileDock" aria-label="ניווט">
-  <button class="dockItem active" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span>⌕</span><small>חיפוש</small></button>
+  <button class="dockItem active" onclick="openAddressesView()"><span>⌂</span><small>הכתובות שלי</small></button>
   <button class="dockItem" onclick="openMobileManage()"><span>⚙</span><small>ניהול</small></button>
   <button class="dockAdd" onclick="openAddModal()" aria-label="הוספת בניין">＋</button>
   <button class="dockItem" onclick="openBackupActionsModal()"><span>☁</span><small>גיבוי</small></button>
