@@ -442,6 +442,27 @@ header:after{content:"";position:absolute;width:280px;height:280px;border-radius
  .addressesView{display:block!important}
 }
 
+
+@media(max-width:650px){
+ .homeSearch{margin:12px 0}
+ .homeSearchBox{
+   height:60px;display:grid;grid-template-columns:42px 1fr 50px;align-items:center;
+   background:#fff;border:1px solid #dfe8f3;border-radius:19px;padding:5px 6px;
+   box-shadow:0 9px 26px rgba(18,48,82,.075)
+ }
+ .homeSearchIcon{display:grid;place-items:center;font-size:27px;color:#0877ff;transform:rotate(-15deg)}
+ .homeSearchBox input{
+   width:100%;min-width:0;border:0!important;outline:0!important;background:transparent!important;
+   font-family:inherit;font-size:16px;color:#172a46;padding:10px 4px
+ }
+ .homeSearchBox input::placeholder{color:#9aa7b9}
+ .homeSearchBox button{
+   width:48px!important;height:48px!important;min-height:48px!important;padding:0!important;
+   border:0!important;border-radius:15px!important;background:linear-gradient(145deg,#2a90ff,#0863e9)!important;
+   color:white!important;font-size:27px!important;line-height:1;box-shadow:0 7px 18px rgba(8,119,255,.25)!important
+ }
+}
+
 </style>
 </head>
 <body>
@@ -487,7 +508,14 @@ header:after{content:"";position:absolute;width:280px;height:280px;border-radius
     <div class="homeWelcomeIcon">🔑</div>
     <div><h2>הכול מוכן למשלוח הבא</h2><p>חפש כתובת, הוסף בניין חדש או פתח את מאגר הכתובות שלך.</p></div>
   </section>
-  <section class="homeActions">
+  <section class="homeSearch">
+  <div class="homeSearchBox">
+    <span class="homeSearchIcon">⌕</span>
+    <input id="homeSearchInput" type="search" placeholder="חפש רחוב, כתובת או קוד..." oninput="homeSearchSync()" onkeydown="if(event.key==='Enter')homeSearchGo()">
+    <button onclick="homeSearchGo()" aria-label="חיפוש">⌕</button>
+  </div>
+</section>
+<section class="homeActions">
     <button class="homePrimary" onclick="openAddressesView()"><span>🏢</span><b>הכתובות שלי</b><small>צפייה וחיפוש במאגר</small></button>
     <button onclick="openAddModal()"><span>＋</span><b>הוספת בניין</b><small>כתובת וקוד חדשים</small></button>
     <button onclick="openMobileManage()"><span>⚙</span><b>ניהול</b><small>גיבוי, Drive ומשתמשים</small></button>
@@ -998,6 +1026,16 @@ function updateDatabase(){
 }
 
 
+function homeSearchSync(){
+  const home=document.getElementById('homeSearchInput');
+  const main=document.getElementById('search');
+  if(home&&main){main.value=home.value;render();}
+}
+function homeSearchGo(){
+  homeSearchSync();
+  openAddressesView();
+  setTimeout(()=>{const main=document.getElementById('search');if(main)main.focus()},120);
+}
 function openAddressesView(){
   const home=document.getElementById('mobileHome');
   const view=document.getElementById('addressesView');
