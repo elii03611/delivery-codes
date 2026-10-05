@@ -761,6 +761,10 @@ function parseText(text){
   }
   return {out,failed};
 }
+function failedImportSummary(failed){
+  if(!failed || !failed.length) return '';
+  return '\n\nלא נוספו למאגר:\n' + failed.map((line,i)=>`${i+1}. ${line}`).join('\n');
+}
 function render(){
   entries.sort(sortEntries);
   const q=searchNormalize(document.getElementById('search').value);
@@ -808,7 +812,7 @@ function importData(){
  if(!out.length){alert('לא הצלחתי לזהות רשומות במבנה הזה.');return}
  if(entries.length && !confirm(`נמצאו ${out.length} רשומות. להחליף את המאגר הקיים?`))return;
  entries=out.sort(sortEntries); save(); render();
- document.getElementById('importMsg').textContent=`נקלטו ${out.length} רשומות. ${failed.length?`לא זוהו ${failed.length} שורות — הן לא הוכנסו למאגר.`:''}`;
+ document.getElementById('importMsg').textContent=`נקלטו ${out.length} רשומות.${failed.length?` לא זוהו ${failed.length} שורות — הן לא הוכנסו למאגר.${failedImportSummary(failed)}`:''}`;
 }
 function loadSample(){document.getElementById('importBox').value=INITIAL_TEXT; document.getElementById('importMsg').textContent='המאגר המקורי נטען לשדה ההדבקה. לחץ "קלוט וסדר".'}
 function exportData(){
@@ -1022,7 +1026,7 @@ function updateDatabase(){
  render();
  closeModal('updateModal');
  document.getElementById('search').value='';
- alert(`המאגר עודכן בהצלחה. נטענו ${entries.length} רשומות.`);
+ alert(`המאגר עודכן בהצלחה.\nנטענו ${entries.length} רשומות.${parsed.failed.length?`\nלא נוספו ${parsed.failed.length} רשומות.${failedImportSummary(parsed.failed)}`:'\nכל הרשומות זוהו ונוספו.'}`);
 }
 
 
